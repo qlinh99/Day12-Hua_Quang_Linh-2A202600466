@@ -341,7 +341,15 @@ cd ../../04-api-gateway/develop
 - API key được check ở đâu?
 - Điều gì xảy ra nếu sai key?
 - Làm sao rotate key?
-
+1. API key được check ở đâu?
+API key được lấy từ biến môi trường tại app.py:35.
+Hàm kiểm tra là app.py:39, và được gắn vào endpoint /ask qua dependency ở app.py:70.
+Điều gì xảy ra nếu sai key?
+Nếu thiếu header X-API-Key: trả về 401 ở app.py:44 và app.py:46.
+Nếu có key nhưng không đúng: trả về 403 ở app.py:49 và app.py:51.
+Làm sao rotate key?
+Cách hiện tại của code: đổi giá trị biến môi trường AGENT_API_KEY rồi restart/redeploy service, vì key được đọc từ env tại app.py:35.
+Lưu ý: file đang có default demo key nếu env không set. Khi production nên luôn set AGENT_API_KEY trên platform để tránh dùng key mặc định.
 Test:
 ```bash
 python app.py
@@ -353,7 +361,7 @@ curl http://localhost:8000/ask -X POST \
 
 #  Có key
 curl http://localhost:8000/ask -X POST \
-  -H "X-API-Key: secret-key-123" \
+  -H "X-API-Key: demo-key-change-in-production" \
   -H "Content-Type: application/json" \
   -d '{"question": "Hello"}'
 ```
@@ -370,14 +378,14 @@ cd ../production
 ```bash
 python app.py
 
-curl http://localhost:8000/token -X POST \
+curl http://localhost:8000/auth/token -X POST \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "secret"}'
+  -d '{"username": "teacher", "password": "teach456"}'
 ```
 
 3. Dùng token để gọi API:
 ```bash
-TOKEN="<token_từ_bước_2>"
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWFjaGVyIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc2NDI0OTgzLCJleHAiOjE3NzY0Mjg1ODN9.J5-QlbRs6hSLMW7VWyDWB6kvoI-BdAmvquyooq6BoV4"
 curl http://localhost:8000/ask -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
