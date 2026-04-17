@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  agent-develop:
+    build:
+      context: .
+      dockerfile: 02-docker/develop/Dockerfile
+    container_name: my-agent-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1

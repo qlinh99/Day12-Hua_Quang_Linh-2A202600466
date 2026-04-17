@@ -13,20 +13,23 @@ WORKDIR /app
 # Bước 3: Copy requirements TRƯỚC (Docker layer cache)
 COPY 02-docker/develop/requirements.txt .
 
-# Bước 4: Cài dependencies
+# Bước 4: Install build dependencies for native packages (websockets, uvloop, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential python3-dev && rm -rf /var/lib/apt/lists/*
+
+# Bước 5: Cài dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Bước 5: Copy code vào container
+# Bước 6: Copy code vào container
 COPY 02-docker/develop/app.py .
 
-# Bước 6: Copy mock utils (from build context root)
+# Bước 7: Copy mock utils (from build context root)
 RUN mkdir -p utils
 COPY utils/mock_llm.py utils/
 
-# Bước 7: Expose port để documentation (không bắt buộc)
+# Bước 8: Expose port để documentation (không bắt buộc)
 EXPOSE 8000
 
-# Bước 8: Command mặc định khi container start
+# Bước 9: Command mặc định khi container start
 CMD ["python", "app.py"]
 
 # ============================================================
